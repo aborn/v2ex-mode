@@ -84,12 +84,17 @@
       (setq json-content (v2ex/do-ajax-action "https://www.v2ex.com/api/topics/latest.json"))
       (while (< num (length json-content))
         (insert (format "%d" num))
-        (let ((item (aref json-content num)))
-          (insert (assoc-default 'title item))
+        (let* ((item (aref json-content num))
+               (url (assoc-default 'url item))
+               (replies (assoc-default 'replies item)))
+          ;;(insert (assoc-default 'title item))
+          (widget-create (v2ex/make-entry item num))
           )
         (setq num (1+ num))
         (insert "\n")
         )
+      (widget-setup)
+      (goto-char (point-min))
       ;;(princ json-content)
       ;;(insert (json-encode json-content))
       ;; (dolist (item json-content)
@@ -97,5 +102,37 @@
       ;;   )
       ))
   (message "done v2ex"))
+
+(define-widget 'v2ex-entry 'url-link
+  "A widget representing a v2ex entry."
+  :format-handler 'v2ex-entry-format)
+
+(defun v2ex/make-entry (data n)
+  (let ((url (assoc-default 'url data))
+        (title (assoc-default 'title data)))
+    (v2ex/alet (title url replies id)
+        (assoc-default 'data data)
+      (list 'v2ex-entry
+            :format v2ex-entry-format
+            :value url
+            :help-echo url
+            :tab-order n
+            :v2ex-n n
+            :v2ex-title title
+            :v2ex-replies replies))))
+
+(defun v2ex-entry-format (widget char)
+  (case char
+    (?N (insert (format "%3d" (1+ (widget-get widget :v2ex-n)))))
+    (?T (insert (truncate-string-to-width (widget-get widget :v2ex-title) 80 nil nil t)))
+    (?U (insert (format "%d" (widget-get widget :v2ex-replies))))
+    (t (widget-default-format-handler widget char))))
+
+(defmacro v2ex/alet (vars alist &rest forms)
+  (let ((alist-var (make-symbol "alist")))
+    `(let* ((,alist-var ,alist)
+            ,@(loop for var in vars
+                    collecting `(,var (assoc-default ',var ,alist-var))))
+       ,@forms)))
 
 (provide 'v2ex-mode)
