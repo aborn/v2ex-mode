@@ -1,9 +1,10 @@
-;;; v2ex-mode.el -- visiting v2ex.com site in emacs
+;;; v2ex-mode.el --- visiting v2ex.com site in emacs
 
 ;; Copyright (C) 2016 Aborn Jiang
 
 ;; Author: Aborn Jiang <aborn.jiang@gmail.com>
 ;; Version: 1.0
+;; Package-Requires: ((cl-lib "0.5"))
 ;; Keywords: v2ex, v2ex.com
 ;; Homepage: https://github.com/aborn/v2ex-mode
 ;; URL: https://github.com/aborn/v2ex-mode
@@ -94,7 +95,9 @@
          (json-data nil)
          (result-data nil))
     (if (not buffer)
-        (error "请求%s服务失败，请重试！" v2ex/build-status-url))
+        (error "请求%s服务失败，请重试！"
+               ;; FIXME What is this? I can't find the definition
+               v2ex/build-status-url))
     (with-current-buffer buffer
       (unless (= 200 (url-http-parse-response)))
       (setq http-content (decode-coding-string (buffer-string) 'utf-8))
@@ -106,6 +109,7 @@
                (setq result-data json-data))))
     result-data))
 
+;;;###autoload
 (defun v2ex ()
   "open v2ex mode"
   (interactive)
@@ -139,6 +143,7 @@
       (switch-to-buffer-other-window v2ex/buffer-name)))
   (message "v2ex updated!"))
 
+;;;###autoload
 (defun v2ex/latest ()
   "open v2ex latest topics"
   (interactive)
@@ -147,6 +152,7 @@
         )
   (v2ex))
 
+;;;###autoload
 (defun v2ex/hot ()
   "open v2ex hot topics"
   (interactive)
@@ -176,7 +182,7 @@
                      :v2ex-replies replies))))
 
 (defun v2ex-entry-format (widget char)
-  (case char
+  (cl-case char
     (?N (insert (format "%3d" (1+ (widget-get widget :v2ex-n)))))
     (?T (insert (truncate-string-to-width (widget-get widget :v2ex-title) 80 nil nil t)))
     (?U (insert (format "%s" (assoc-default 'username (widget-get widget :v2ex-member)))))
@@ -187,8 +193,9 @@
 (defmacro v2ex/alet (vars alist &rest forms)
   (let ((alist-var (make-symbol "alist")))
     `(let* ((,alist-var ,alist)
-            ,@(loop for var in vars
-                    collecting `(,var (assoc-default ',var ,alist-var))))
+            ,@(cl-loop for var in vars
+                       collecting `(,var (assoc-default ',var ,alist-var))))
        ,@forms)))
 
 (provide 'v2ex-mode)
+;;; v2ex-mode.el ends here
