@@ -17,4 +17,5 @@ M-x v2ex
 ```
 
 ## Show
+The content list are shown in *v2ex* buffer.  
 ![](v2ex.png "v2ex conent list")
