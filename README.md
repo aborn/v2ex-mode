@@ -21,7 +21,7 @@ M-x v2ex
 ```
 
 ## Hotkey
-in \*v2ex* buffer, following are supported  
+In \*v2ex* buffer, following hot-key are supported:  
 **h** -- fetch the hot topics;  
 **l** -- fetch the latest topics;  
 **r** -- reload the current content;  
