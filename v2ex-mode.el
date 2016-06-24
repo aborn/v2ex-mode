@@ -6,6 +6,7 @@
 ;; Version: 1.0
 ;; Keywords: v2ex, v2ex.com
 ;; Homepage: https://github.com/aborn/v2ex-mode
+;; URL: https://github.com/aborn/v2ex-mode
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -20,10 +21,17 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Source code
+;;
+;; v2ex-mode code can be found here:
+;;   http://github.com/aborn/v2ex-mode
+
 ;;; Commentary:
 
 ;; visiting ve2x.com freely in emacs.
 ;; M-x v2ex
+
+;;; Code:
 
 (require 'cl-lib)
 (require 'json)
@@ -95,11 +103,6 @@
         )
       (widget-setup)
       (goto-char (point-min))
-      ;;(princ json-content)
-      ;;(insert (json-encode json-content))
-      ;; (dolist (item json-content)
-      ;;   (insert (plist-get item 'title))
-      ;;   )
       ))
   (message "done v2ex"))
 
