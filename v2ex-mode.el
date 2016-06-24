@@ -69,7 +69,7 @@
          (json-data nil)
          (result-data nil))
     (if (not buffer)
-        (error "请求%服务失败，请重试！" v2ex/build-status-url))
+        (error "请求%s服务失败，请重试！" v2ex/build-status-url))
     (with-current-buffer buffer
       (unless (= 200 (url-http-parse-response)))
       (setq http-content (decode-coding-string (buffer-string) 'utf-8))
