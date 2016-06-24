@@ -43,7 +43,7 @@
     map)
   "major mode for visiting v2ex.com")
 
-(defvar v2ex-entry-format "%N. %[%T%] (%U, %R replies)\n")
+(defvar v2ex-entry-format "%N. %[%T%] (%U@%S ,%R replies)\n")
 
 (define-derived-mode v2ex-mode nil "v2ex-mode"
   "Major mode for visit http://v2ex.com/"
@@ -111,7 +111,7 @@
 
 (defun v2ex/make-entry (data n)
   (let ()
-    (v2ex/alet (title url replies id member)
+    (v2ex/alet (title url replies id member node)
         data
       (list 'v2ex-entry
             :format v2ex-entry-format
@@ -122,6 +122,7 @@
             :v2ex-title title
             :v2ex-id id
             :v2ex-member member
+            :v2ex-node node
             :v2ex-replies replies))))
 
 (defun v2ex-entry-format (widget char)
@@ -129,6 +130,7 @@
     (?N (insert (format "%3d" (1+ (widget-get widget :v2ex-n)))))
     (?T (insert (truncate-string-to-width (widget-get widget :v2ex-title) 80 nil nil t)))
     (?U (insert (format "%s" (assoc-default 'username (widget-get widget :v2ex-member)))))
+    (?S (insert (format "%s" (assoc-default 'title (widget-get widget :v2ex-node)))))
     (?R (insert (format "%d" (widget-get widget :v2ex-replies))))
     (t (widget-default-format-handler widget char))))
 
