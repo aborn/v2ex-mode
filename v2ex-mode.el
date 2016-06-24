@@ -35,6 +35,8 @@
     map)
   "major mode for visiting v2ex.com")
 
+(defvar v2ex-entry-format "%N. %[%T%] (%U replies)\n")
+
 (define-derived-mode v2ex-mode nil "v2ex-mode"
   "Major mode for visit http://v2ex.com/"
   (widen)
@@ -83,7 +85,6 @@
       (erase-buffer)
       (setq json-content (v2ex/do-ajax-action "https://www.v2ex.com/api/topics/latest.json"))
       (while (< num (length json-content))
-        (insert (format "%d" num))
         (let* ((item (aref json-content num))
                (url (assoc-default 'url item))
                (replies (assoc-default 'replies item)))
@@ -91,7 +92,6 @@
           (widget-create (v2ex/make-entry item num))
           )
         (setq num (1+ num))
-        (insert "\n")
         )
       (widget-setup)
       (goto-char (point-min))
@@ -108,10 +108,9 @@
   :format-handler 'v2ex-entry-format)
 
 (defun v2ex/make-entry (data n)
-  (let ((url (assoc-default 'url data))
-        (title (assoc-default 'title data)))
+  (let ()
     (v2ex/alet (title url replies id)
-        (assoc-default 'data data)
+        data
       (list 'v2ex-entry
             :format v2ex-entry-format
             :value url
