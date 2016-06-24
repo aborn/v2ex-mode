@@ -40,10 +40,13 @@
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map widget-keymap)
     (define-key map "r" 'v2ex)
+    (define-key map "h" 'v2ex/hot)
+    (define-key map "l" 'v2ex/latest)
+    (define-key map "q" 'v2ex/quit)
     map)
   "major mode for visiting v2ex.com")
 
-(defvar v2ex-entry-format "%N. %[%T%] (%U@%S ,%R replies)\n")
+(defvar v2ex-entry-format "%N. %[%T%] (%U@%S ,%R个回复)\n")
 
 (define-derived-mode v2ex-mode nil "v2ex-mode"
   "Major mode for visit http://v2ex.com/"
@@ -54,6 +57,28 @@
   "the content display buffer name"
   :group 'v2ex-mode
   :type 'string)
+
+(defcustom v2ex/hot-api-uri "https://www.v2ex.com/api/topics/hot.json"
+  "the hot topic api"
+  :group 'v2ex-mode
+  :type 'string)
+
+(defvar v2ex-current-visit
+  '(:name "latest" :url v2ex/latest-api-uri :desc "最新主题")
+  "the current visit")
+
+(defcustom v2ex/latest-api-uri "https://www.v2ex.com/api/topics/latest.json"
+  "the url of latest topics api"
+  :group 'v2ex-mode
+  :type 'string)
+
+(defun v2ex/quit ()
+  "quit the v2ex buffer"
+  (interactive)
+  (let ((buffer (current-buffer)))
+    (unless (one-window-p)
+      (delete-window))
+    (kill-buffer buffer)))
 
 (defun v2ex/read-http-data-as-json (http-data)
   (with-temp-buffer
@@ -87,11 +112,16 @@
   (message "open v2ex.com")
   (let* ((v2ex-buffer (get-buffer-create v2ex/buffer-name))
          (json-content nil)
+         (url (eval (plist-get v2ex-current-visit :url)))
+         (site-name (plist-get v2ex-current-visit :name))
+         (site-desc (plist-get v2ex-current-visit :desc))
          (num 0))
     (with-current-buffer v2ex-buffer
       (v2ex-mode)
-      (setq json-content (v2ex/do-ajax-action "https://www.v2ex.com/api/topics/latest.json"))
+      (setq json-content (v2ex/do-ajax-action url))
       (erase-buffer)
+      (insert (format "  %s ----- time:%s\n" site-desc
+                      (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
       (while (< num (length json-content))
         (let* ((item (aref json-content num))
                (url (assoc-default 'url item))
@@ -103,7 +133,27 @@
       (widget-setup)
       (goto-char (point-min))
       ))
+  (unless (get-buffer-window v2ex/buffer-name)
+    (if (one-window-p)
+        (switch-to-buffer v2ex/buffer-name)
+      (switch-to-buffer-other-window v2ex/buffer-name)))
   (message "v2ex updated!"))
+
+(defun v2ex/latest ()
+  "open v2ex latest topics"
+  (interactive)
+  (setq v2ex-current-visit
+        '(:name "latest" :url v2ex/latest-api-uri :desc "最新主题")
+        )
+  (v2ex))
+
+(defun v2ex/hot ()
+  "open v2ex hot topics"
+  (interactive)
+  (setq v2ex-current-visit
+        '(:name "hot" :url v2ex/hot-api-uri :desc "最热主题")
+        )
+  (v2ex))
 
 (define-widget 'v2ex-entry 'url-link
   "A widget representing a v2ex entry."
@@ -112,18 +162,18 @@
 (defun v2ex/make-entry (data n)
   (let ()
     (v2ex/alet (title url replies id member node)
-        data
-      (list 'v2ex-entry
-            :format v2ex-entry-format
-            :value url
-            :help-echo url
-            :tab-order n
-            :v2ex-n n
-            :v2ex-title title
-            :v2ex-id id
-            :v2ex-member member
-            :v2ex-node node
-            :v2ex-replies replies))))
+               data
+               (list 'v2ex-entry
+                     :format v2ex-entry-format
+                     :value url
+                     :help-echo url
+                     :tab-order n
+                     :v2ex-n n
+                     :v2ex-title title
+                     :v2ex-id id
+                     :v2ex-member member
+                     :v2ex-node node
+                     :v2ex-replies replies))))
 
 (defun v2ex-entry-format (widget char)
   (case char
