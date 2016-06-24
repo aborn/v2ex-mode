@@ -2,7 +2,7 @@
 v2ex-mode, visiting http://v2ex.com/ using emacs.
 
 ## Install
-**1.** install it from elpa pakge source (i.e. [melpa](https://melpa.org/)).  
+**1.** install it from elpa pakge source (i.e. [melpa](https://melpa.org/) or [popkit elpa](https://elpa.popkit.org/)).  
 ```elisp
 M-x package-install v2ex-mode
 ```
