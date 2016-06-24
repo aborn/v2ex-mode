@@ -1,5 +1,5 @@
 # v2ex-mode
-v2ex-mode, visiting http://v2ex.com/ using emacs.
+v2ex-mode, visiting [http://v2ex.com/](http://v2ex.com/) freely in emacs.
 
 ## Install
 Install it from elpa package source (i.e. [melpa](https://melpa.org/) or [popkit elpa](https://elpa.popkit.org/)).  
@@ -22,10 +22,10 @@ M-x v2ex
 
 ## Hotkey
 in \*v2ex* buffer, following are supported  
-1. **h** fetch the hot topics;  
-2. **l** fetch the latest topics;  
-3. **r** reload the current content;  
-3. **q** exit/quit kill & quit \*v2ex* buffer.
+**h** -- fetch the hot topics;  
+**l** -- fetch the latest topics;  
+**r** -- reload the current content;  
+**q** -- exit/quit kill & quit \*v2ex* buffer.
 
 ## Show
 The content list are shown in \*v2ex* buffer.  
