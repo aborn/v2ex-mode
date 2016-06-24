@@ -15,3 +15,6 @@ M-x package-install v2ex-mode
 ```elisp
 M-x v2ex
 ```
+
+## Show
+![](v2ex.png "v2ex conent list")
