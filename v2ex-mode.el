@@ -43,7 +43,7 @@
     map)
   "major mode for visiting v2ex.com")
 
-(defvar v2ex-entry-format "%N. %[%T%] (%U replies)\n")
+(defvar v2ex-entry-format "%N. %[%T%] (%U, %R replies)\n")
 
 (define-derived-mode v2ex-mode nil "v2ex-mode"
   "Major mode for visit http://v2ex.com/"
@@ -90,13 +90,12 @@
          (num 0))
     (with-current-buffer v2ex-buffer
       (v2ex-mode)
-      (erase-buffer)
       (setq json-content (v2ex/do-ajax-action "https://www.v2ex.com/api/topics/latest.json"))
+      (erase-buffer)
       (while (< num (length json-content))
         (let* ((item (aref json-content num))
                (url (assoc-default 'url item))
                (replies (assoc-default 'replies item)))
-          ;;(insert (assoc-default 'title item))
           (widget-create (v2ex/make-entry item num))
           )
         (setq num (1+ num))
@@ -104,7 +103,7 @@
       (widget-setup)
       (goto-char (point-min))
       ))
-  (message "done v2ex"))
+  (message "v2ex updated!"))
 
 (define-widget 'v2ex-entry 'url-link
   "A widget representing a v2ex entry."
@@ -112,7 +111,7 @@
 
 (defun v2ex/make-entry (data n)
   (let ()
-    (v2ex/alet (title url replies id)
+    (v2ex/alet (title url replies id member)
         data
       (list 'v2ex-entry
             :format v2ex-entry-format
@@ -121,13 +120,16 @@
             :tab-order n
             :v2ex-n n
             :v2ex-title title
+            :v2ex-id id
+            :v2ex-member member
             :v2ex-replies replies))))
 
 (defun v2ex-entry-format (widget char)
   (case char
     (?N (insert (format "%3d" (1+ (widget-get widget :v2ex-n)))))
     (?T (insert (truncate-string-to-width (widget-get widget :v2ex-title) 80 nil nil t)))
-    (?U (insert (format "%d" (widget-get widget :v2ex-replies))))
+    (?U (insert (format "%s" (assoc-default 'username (widget-get widget :v2ex-member)))))
+    (?R (insert (format "%d" (widget-get widget :v2ex-replies))))
     (t (widget-default-format-handler widget char))))
 
 (defmacro v2ex/alet (vars alist &rest forms)
