@@ -6,7 +6,7 @@ v2ex-mode, visiting http://v2ex.com/ using emacs.
 ```elisp
 M-x package-install v2ex-mode
 ```
-**2.** init it using the folloing elisp code.  
+**2.** put the folloing elisp snippet in your *init.el*(or *.emacs*) file.  
 ```elisp
 (require 'v2ex-mode)
 ```
