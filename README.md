@@ -27,7 +27,7 @@ In \*v2ex* buffer, following hot-key are supported:
 **r** -- reload the current content;  
 **q** -- exit/quit kill & quit \*v2ex* buffer.
 
-## Vim-like fast move
+## Vim-like move
 In v2ex-mode, vim-like *hjkl* hot-key are supported, which used for move cursor
 swiftly.
 
