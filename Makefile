@@ -10,7 +10,7 @@ travis-ci: elpa
 	$(CASK) exec $(EMACS) -batch -Q -l ci/v2ex-mode-init.el
 
 clean:
-	        rm -f *.elc
+	rm -f *.elc
 
 elpa: $(ELPA_DIR)
 $(ELPA_DIR): Cask
