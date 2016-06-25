@@ -126,7 +126,6 @@
       (switch-to-buffer-other-window v2ex-buffer-name)))
   (message "v2ex updated!"))
 
-;;;###autoload
 (defun v2ex-quit ()
   "quit the v2ex buffer"
   (interactive)
