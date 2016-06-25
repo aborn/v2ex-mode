@@ -111,7 +111,7 @@
            ))
 
 (defun v2ex-action (json-content)
-  (message "json-content=%s" json-content)
+  ;; (message "json-content=%s" json-content)
   (let ((v2ex-buffer (get-buffer-create v2ex/buffer-name))
         (site-name (plist-get v2ex-current-visit :name))
         (site-desc (plist-get v2ex-current-visit :desc))
