@@ -132,7 +132,7 @@
   (message "open v2ex.com in a %s way" (if async
                                            "async"
                                          "sync"))
-  (request (eval (plist-get v2ex-current-visit :url))
+  (request (symbol-value (plist-get v2ex-current-visit :url))
            :parser (lambda ()
                      (json-read-from-string (decode-coding-string (buffer-string) 'utf-8)))
            :sync (not async)
