@@ -6,7 +6,6 @@ v2ex-mode, visiting [http://v2ex.com/](http://v2ex.com/) freely in emacs.
 Install it from elpa package source (i.e. [melpa](https://melpa.org/) or [popkit elpa](https://elpa.popkit.org/)).  
 ```elisp
 M-x package-install v2ex-mode
-(require 'v2ex-mode)    ;; put this line code into your initial file.
 ```
 
 Or, you can install it manually, download **v2ex-mode.el** file to **\<your-local-directory>**, and
