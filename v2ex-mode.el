@@ -81,6 +81,11 @@
   :group 'v2ex-mode
   :type 'string)
 
+(defcustom v2ex/timeout 10
+  "timeout control when connecting v2ex,in seconds"
+  :group 'v2ex-mode
+  :type 'number)
+
 (defun v2ex/quit ()
   "quit the v2ex buffer"
   (interactive)
@@ -108,6 +113,7 @@
            :error (cl-function
                    (lambda (&key data &allow-other-keys)
                      (error "请求%s服务失败，请重试！" url)))
+           :timeout v2ex/timeout
            ))
 
 (defun v2ex-action (json-content)
