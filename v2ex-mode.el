@@ -81,6 +81,11 @@
   :group 'v2ex-mode
   :type 'string)
 
+(defcustom v2ex/timeout 10
+  "timeout control when connecting v2ex,in seconds"
+  :group 'v2ex-mode
+  :type 'number)
+
 (defun v2ex/quit ()
   "quit the v2ex buffer"
   (interactive)
@@ -95,20 +100,6 @@
     (goto-char (point-min))
     (re-search-forward "^$")
     (json-read-from-string (buffer-substring (point) (point-max)))))
-
-(defun v2ex/do-ajax-action (url callback)
-  "get build status info"
-  (request url
-           :parser (lambda ()
-                     (json-read-from-string (decode-coding-string (buffer-string) 'utf-8)))
-           :sync t
-           :success (cl-function
-                     (lambda (&key data &allow-other-keys)
-                       (funcall callback data)))
-           :error (cl-function
-                   (lambda (&key data &allow-other-keys)
-                     (error "请求%s服务失败，请重试！" url)))
-           ))
 
 (defun v2ex-action (json-content)
   ;; (message "json-content=%s" json-content)
@@ -127,16 +118,7 @@
           (widget-create (v2ex/make-entry item num)))
         (setq num (1+ num)))
       (widget-setup)
-      (goto-char (point-min))
-      )))
-
-;;;###autoload
-(defun v2ex ()
-  "open v2ex mode"
-  (interactive)
-  (message "open v2ex.com")
-  (let ((url (eval (plist-get v2ex-current-visit :url))))
-    (v2ex/do-ajax-action url #'v2ex-action))
+      (goto-char (point-min))))
   (unless (get-buffer-window v2ex/buffer-name)
     (if (one-window-p)
         (switch-to-buffer v2ex/buffer-name)
@@ -144,22 +126,42 @@
   (message "v2ex updated!"))
 
 ;;;###autoload
-(defun v2ex/latest ()
+(defun v2ex (&optional async)
+  "open v2ex mode"
+  (interactive "P")
+  (message "open v2ex.com in a %s way" (if async
+                                           "async"
+                                         "sync"))
+  (request (eval (plist-get v2ex-current-visit :url))
+           :parser (lambda ()
+                     (json-read-from-string (decode-coding-string (buffer-string) 'utf-8)))
+           :sync (not async)
+           :success (cl-function
+                     (lambda (&key data &allow-other-keys)
+                       (v2ex-action data)))
+           :error (cl-function
+                   (lambda (&key data &allow-other-keys)
+                     (error "请求%s服务失败，请重试！" url)))
+           :timeout v2ex/timeout
+           ))
+
+;;;###autoload
+(defun v2ex/latest (&optional async)
   "open v2ex latest topics"
-  (interactive)
+  (interactive "P")
   (setq v2ex-current-visit
         '(:name "latest" :url v2ex/latest-api-uri :desc "最新主题")
         )
-  (v2ex))
+  (v2ex async))
 
 ;;;###autoload
-(defun v2ex/hot ()
+(defun v2ex/hot (&optional async)
   "open v2ex hot topics"
-  (interactive)
+  (interactive "P")
   (setq v2ex-current-visit
         '(:name "hot" :url v2ex/hot-api-uri :desc "最热主题")
         )
-  (v2ex))
+  (v2ex async))
 
 (define-widget 'v2ex-entry 'url-link
   "A widget representing a v2ex entry."
