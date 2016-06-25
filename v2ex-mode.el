@@ -4,7 +4,7 @@
 
 ;; Author: Aborn Jiang <aborn.jiang@gmail.com>
 ;; Version: 1.0
-;; Package-Requires: ((cl-lib "0.5"))
+;; Package-Requires: ((cl-lib "0.5") (request "0.2")
 ;; Keywords: v2ex, v2ex.com
 ;; Homepage: https://github.com/aborn/v2ex-mode
 ;; URL: https://github.com/aborn/v2ex-mode
@@ -36,6 +36,7 @@
 
 (require 'cl-lib)
 (require 'json)
+(require 'request)
 
 (defvar v2ex-mode-map
   (let ((map (make-sparse-keymap)))
@@ -88,53 +89,46 @@
     (re-search-forward "^$")
     (json-read-from-string (buffer-substring (point) (point-max)))))
 
-(defun v2ex/do-ajax-action (url &optional type)
+(defun v2ex/do-ajax-action (url callback)
   "get build status info"
-  (let* ((buffer (url-retrieve-synchronously url))
-         (http-content nil)
-         (json-data nil)
-         (result-data nil))
-    (if (not buffer)
-        (error "请求%s服务失败，请重试！" url))
-    (with-current-buffer buffer
-      (unless (= 200 (url-http-parse-response)))
-      (setq http-content (decode-coding-string (buffer-string) 'utf-8))
-      ;; (message http-content)
-      (if (string= type "html")
-          (setq result-data http-content)
-        (progn (setq json-data (v2ex/read-http-data-as-json http-content))
-               ;; (princ json-data)
-               (setq result-data json-data))))
-    result-data))
+  (request url
+           :parser (lambda ()
+                     (json-read-from-string (decode-coding-string (buffer-string) 'utf-8)))
+           :sync t
+           :success (cl-function
+                     (lambda (&key data &allow-other-keys)
+                       (funcall callback data)))
+           :error (cl-function
+                   (lambda (&key data &allow-other-keys)
+                     (error "请求%s服务失败，请重试！" url)))
+           ))
 
+(defun v2ex-action (json-content)
+  (message "json-content=%s" json-content)
+  (let ((v2ex-buffer (get-buffer-create v2ex/buffer-name))
+        (site-name (plist-get v2ex-current-visit :name))
+        (site-desc (plist-get v2ex-current-visit :desc))
+        (num 0))
+    (with-current-buffer v2ex-buffer
+      (v2ex-mode)
+      (erase-buffer)
+      (insert (format "  %s ----- time:%s\n" site-desc
+                      (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
+      (dolist (item (mapcar #'identity json-content))
+        (let ((url (assoc-default 'url item))
+              (replies (assoc-default 'replies item)))
+          (widget-create (v2ex/make-entry item num)))
+        (setq num (1+ num)))
+      (widget-setup)
+      (goto-char (point-min))
+      )))
 ;;;###autoload
 (defun v2ex ()
   "open v2ex mode"
   (interactive)
   (message "open v2ex.com")
-  (let* ((v2ex-buffer (get-buffer-create v2ex/buffer-name))
-         (json-content nil)
-         (url (eval (plist-get v2ex-current-visit :url)))
-         (site-name (plist-get v2ex-current-visit :name))
-         (site-desc (plist-get v2ex-current-visit :desc))
-         (num 0))
-    (with-current-buffer v2ex-buffer
-      (v2ex-mode)
-      (setq json-content (v2ex/do-ajax-action url))
-      (erase-buffer)
-      (insert (format "  %s ----- time:%s\n" site-desc
-                      (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
-      (while (< num (length json-content))
-        (let* ((item (aref json-content num))
-               (url (assoc-default 'url item))
-               (replies (assoc-default 'replies item)))
-          (widget-create (v2ex/make-entry item num))
-          )
-        (setq num (1+ num))
-        )
-      (widget-setup)
-      (goto-char (point-min))
-      ))
+  (let ((url (eval (plist-get v2ex-current-visit :url))))
+    (v2ex/do-ajax-action url #'v2ex-action))
   (unless (get-buffer-window v2ex/buffer-name)
     (if (one-window-p)
         (switch-to-buffer v2ex/buffer-name)
