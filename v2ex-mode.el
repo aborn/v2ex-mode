@@ -1,4 +1,4 @@
-;;; v2ex-mode.el --- visiting v2ex.com site in emacs
+;;; v2ex-mode.el --- visiting v2ex.com site in emacs  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016 Aborn Jiang
 
