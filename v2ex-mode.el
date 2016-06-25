@@ -44,9 +44,14 @@
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map widget-keymap)
     (define-key map "r" 'v2ex)
-    (define-key map "h" 'v2ex/hot)
-    (define-key map "l" 'v2ex/latest)
+    (define-key map "H" 'v2ex/hot)
+    (define-key map "L" 'v2ex/latest)
     (define-key map "q" 'v2ex/quit)
+    ;; vim-like hjkl for fast move
+    (define-key map "h" 'backward-char)
+    (define-key map "j" 'next-line)  
+    (define-key map "k" 'previous-line)
+    (define-key map "l" 'forward-char)
     map)
   "major mode for visiting v2ex.com")
 

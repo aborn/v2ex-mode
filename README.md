@@ -22,10 +22,14 @@ M-x v2ex
 
 ## Hotkey
 In \*v2ex* buffer, following hot-key are supported:  
-**h** -- fetch the hot topics;  
-**l** -- fetch the latest topics;  
+**H** -- fetch the hot topics;  
+**L** -- fetch the latest topics;  
 **r** -- reload the current content;  
 **q** -- exit/quit kill & quit \*v2ex* buffer.
+
+## Vim-like fast move
+In v2ex-mode, vim-like *hjkl* hot-key are supported, which used for move cursor
+swiftly.
 
 ## Show
 The content list are shown in \*v2ex* buffer.  
