@@ -1,4 +1,5 @@
 # v2ex-mode
+[![Build Status](https://travis-ci.org/aborn/v2ex-mode.svg?branch=master)](https://travis-ci.org/aborn/v2ex-mode)  
 v2ex-mode, visiting [http://v2ex.com/](http://v2ex.com/) freely in emacs.
 
 ## Install
