@@ -122,6 +122,7 @@
       (widget-setup)
       (goto-char (point-min))
       )))
+
 ;;;###autoload
 (defun v2ex ()
   "open v2ex mode"
@@ -159,7 +160,7 @@
 
 (defun v2ex/make-entry (data n)
   (let ()
-    (v2ex/alet (title url replies id member node)
+    (v2ex/alet (title url replies member node)
                data
                (list 'v2ex-entry
                      :format v2ex-entry-format
@@ -168,7 +169,6 @@
                      :tab-order n
                      :v2ex-n n
                      :v2ex-title title
-                     :v2ex-id id
                      :v2ex-member member
                      :v2ex-node node
                      :v2ex-replies replies))))
