@@ -9,6 +9,8 @@
 ;; Homepage: https://github.com/aborn/v2ex-mode
 ;; URL: https://github.com/aborn/v2ex-mode
 
+;; This file is NOT part of GNU Emacs.
+
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -48,10 +50,10 @@
 (defvar v2ex-mode-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map widget-keymap)
+    (define-key map "q" 'quit-window)
     (define-key map "r" 'v2ex)
     (define-key map "H" 'v2ex-hot)
     (define-key map "L" 'v2ex-latest)
-    (define-key map "q" 'v2ex-quit)
     ;; vim-like hjkl for cursor move swiftly
     (define-key map "h" 'backward-char)
     (define-key map "j" 'next-line)  
@@ -59,8 +61,6 @@
     (define-key map "l" 'forward-char)
     map)
   "Major mode for visit http://v2ex.com/")
-
-(defvar v2ex-entry-format "%N. %[%T%] (%U@%S ,%R个回复)\n")
 
 (define-derived-mode v2ex-mode special-mode "v2ex-mode"
   "Major mode for visit http://v2ex.com/"
@@ -99,10 +99,9 @@
     (re-search-forward "^$")
     (json-read-from-string (buffer-substring (point) (point-max)))))
 
-(defun v2ex--action (json-content)
+(defun v2ex--render (json-content response)
   ;; (message "json-content=%s" json-content)
   (let* ((v2ex-buffer (get-buffer-create v2ex-buffer-name))
-         (site-name (plist-get v2ex-current-visit :name))
          (site-desc (plist-get v2ex-current-visit :desc))
          (num 0))
     (with-current-buffer v2ex-buffer
@@ -110,12 +109,12 @@
       (erase-buffer)
       (setq font-lock-mode nil)
       (goto-char (point-min))
-      (insert (format "  %s ----- time:%s\n" site-desc
-                      (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
+      (insert (format "  %s ----- time:%s remaining:%s(limit:%s)\n" site-desc
+                      (format-time-string "%Y-%m-%d %H:%M:%S Week %W" (current-time))
+                      (request-response-header response "X-Rate-Limit-Remaining")
+                      (request-response-header response "X-Rate-Limit-Limit")))
       (dolist (item (mapcar #'identity json-content))
-        (let ((url (assoc-default 'url item))
-              (replies (assoc-default 'replies item)))
-          (widget-create (v2ex-make-entry item num)))
+        (widget-create (v2ex-make-entry item num))
         (setq num (1+ num)))
       (widget-setup)
       (goto-char (point-min))
@@ -123,16 +122,7 @@
   (unless (get-buffer-window v2ex-buffer-name)
     (if (one-window-p)
         (switch-to-buffer v2ex-buffer-name)
-      (switch-to-buffer-other-window v2ex-buffer-name)))
-  (message "v2ex updated!"))
-
-(defun v2ex-quit ()
-  "quit the v2ex buffer"
-  (interactive)
-  (let ((buffer (current-buffer)))
-    (unless (one-window-p)
-      (delete-window))
-    (kill-buffer buffer)))
+      (switch-to-buffer-other-window v2ex-buffer-name))))
 
 ;;;###autoload
 (defun v2ex (&optional async)
@@ -146,11 +136,13 @@
                      (json-read-from-string (decode-coding-string (buffer-string) 'utf-8)))
            :sync (not async)
            :success (cl-function
-                     (lambda (&key data &allow-other-keys)
-                       (v2ex--action data)))
+                     (lambda (&key data &key response &allow-other-keys)
+                       (message "Request http://v2ex.com/ success!")
+                       (v2ex--render data response)))
+           :complete (lambda (&rest _) (message "Request finished and *v2ex* updated!"))
            :error (cl-function
-                   (lambda (&key data &allow-other-keys)
-                     (error "请求%s服务失败，请重试！" (plist-get v2ex-current-visit :url))))
+                   (lambda (&rest args &key error-thrown &allow-other-keys)
+                     (error "Got errror: %S in request %s!Please retry!" error-thrown (plist-get v2ex-current-visit :url))))
            :timeout v2ex-request-timeout
            ))
 
@@ -174,9 +166,11 @@
   "A widget representing a v2ex entry."
   :format-handler 'v2ex-entry-format)
 
+(defvar v2ex-entry-format "%N. %[%T%] (%U@%S|发表:%P|%R个回复|最近:%Q)\n")
+
 (defun v2ex-make-entry (data n)
   (let ()
-    (v2ex--alet (title url replies member node)
+    (v2ex--alet (title url replies member node created last_touched)
                 data
                 (list 'v2ex-entry
                       :format v2ex-entry-format
@@ -187,6 +181,8 @@
                       :v2ex-title title
                       :v2ex-member member
                       :v2ex-node node
+                      :v2ex-created created
+                      :v2ex-last-touched last_touched
                       :v2ex-replies replies))))
 
 (defun v2ex-entry-format (widget char)
@@ -195,6 +191,12 @@
     (?T (insert (truncate-string-to-width (widget-get widget :v2ex-title) 80 nil nil t)))
     (?U (insert (format "%s" (assoc-default 'username (widget-get widget :v2ex-member)))))
     (?S (insert (format "%s" (assoc-default 'title (widget-get widget :v2ex-node)))))
+    (?P (insert (format "%s" (format-time-string
+                              "%Y-%m-%d %H:%M:%S"
+                              (seconds-to-time (widget-get widget :v2ex-created))))))
+    (?Q (insert (format "%s" (format-time-string
+                              "%Y-%m-%d %H:%M:%S"
+                              (seconds-to-time (widget-get widget :v2ex-last-touched))))))
     (?R (insert (format "%d" (widget-get widget :v2ex-replies))))
     (t (widget-default-format-handler widget char))))
 
