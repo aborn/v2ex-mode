@@ -61,6 +61,9 @@
     (define-key map "j" 'next-line)
     (define-key map "k" 'previous-line)
     (define-key map "l" 'forward-char)
+    ;; n/p is shorter than C-n/p
+    (define-key map "n" 'next-line)
+    (define-key map "p" 'previous-line)
     map)
   "Major mode for visit http://v2ex.com/.")
 
