@@ -47,7 +47,8 @@
 
 (defvar v2ex-mode-map
   (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map special-mode-map)
+    (set-keymap-parent map widget-keymap)
+    (define-key map "q" 'quit-window)
     (define-key map "r" 'v2ex)
     (define-key map "H" 'v2ex-hot)
     (define-key map "L" 'v2ex-latest)
