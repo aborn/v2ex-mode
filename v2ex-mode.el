@@ -103,13 +103,13 @@
     (with-current-buffer v2ex-buffer
       (setq buffer-read-only nil)
       (erase-buffer)
-      (setq font-lock-mode nil)
+      (setq font-lock-mode nil)         ; What's this for?
       (goto-char (point-min))
       (insert (format "  %s ----- time:%s remaining:%s(limit:%s)\n" site-desc
                       (format-time-string "%Y-%m-%d %H:%M:%S Week %W" (current-time))
                       (request-response-header response "X-Rate-Limit-Remaining")
                       (request-response-header response "X-Rate-Limit-Limit")))
-      (dolist (item (mapcar #'identity json-content))
+      (dolist (item (append json-content nil))
         (widget-create (v2ex-make-entry item num))
         (setq num (1+ num)))
       (widget-setup)
