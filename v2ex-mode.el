@@ -51,7 +51,7 @@
 
 (defvar v2ex-mode-map
   (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map widget-keymap)
+    (set-keymap-parent map (make-composed-keymap widget-keymap special-mode-map))
     (define-key map "q" 'quit-window)
     (define-key map "r" 'v2ex)
     (define-key map "H" 'v2ex-hot)
@@ -66,7 +66,6 @@
 
 (define-derived-mode v2ex-mode special-mode "v2ex-mode"
   "Major mode for visit http://v2ex.com/."
-  (setq buffer-read-only t)
   :group 'v2ex-mode)
 
 (defcustom v2ex-buffer-name "*v2ex*"
