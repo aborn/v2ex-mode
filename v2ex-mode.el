@@ -109,7 +109,7 @@
       (setq font-lock-mode nil)
       (goto-char (point-min))
       (insert (format "  %s ----- time:%s\n" site-desc
-                      (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
+                      (format-time-string "%Y-%m-%d %H:%M:%S Week %W" (current-time))))
       (dolist (item (mapcar #'identity json-content))
         (widget-create (v2ex-make-entry item num))
         (setq num (1+ num)))
