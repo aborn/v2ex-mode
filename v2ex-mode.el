@@ -41,6 +41,8 @@
 (require 'cl-lib)
 (require 'json)
 (require 'request)
+(require 'widget)
+(require 'wid-edit)
 
 (defgroup v2ex-mode nil
   "Major mode for visiting v2ex.com site."
@@ -56,39 +58,38 @@
     (define-key map "L" 'v2ex-latest)
     ;; vim-like hjkl for cursor move swiftly
     (define-key map "h" 'backward-char)
-    (define-key map "j" 'next-line)  
+    (define-key map "j" 'next-line)
     (define-key map "k" 'previous-line)
     (define-key map "l" 'forward-char)
     map)
-  "Major mode for visit http://v2ex.com/")
+  "Major mode for visit http://v2ex.com/.")
 
 (define-derived-mode v2ex-mode special-mode "v2ex-mode"
-  "Major mode for visit http://v2ex.com/"
-  (widen)
+  "Major mode for visit http://v2ex.com/."
   (setq buffer-read-only t)
   :group 'v2ex-mode)
 
 (defcustom v2ex-buffer-name "*v2ex*"
-  "the buffer name of content display "
+  "The buffer name of content display."
   :group 'v2ex-mode
   :type 'string)
 
 (defcustom v2ex-hot-api-uri "https://www.v2ex.com/api/topics/hot.json"
-  "the hot topic api"
+  "The hot topic api."
   :group 'v2ex-mode
   :type 'string)
 
 (defcustom v2ex-latest-api-uri "https://www.v2ex.com/api/topics/latest.json"
-  "the url of latest topics api"
+  "The url of latest topics api."
   :group 'v2ex-mode
   :type 'string)
 
 (defvar v2ex-current-visit
   '(:name "latest" :url v2ex-latest-api-uri :desc "最新主题")
-  "the current visit")
+  "The current visit.")
 
 (defcustom v2ex-request-timeout 10
-  "timeout control when connecting v2ex,in seconds"
+  "Timeout control when connecting v2ex, in seconds."
   :group 'v2ex-mode
   :type 'number)
 
@@ -126,7 +127,7 @@
 
 ;;;###autoload
 (defun v2ex (&optional async)
-  "open v2ex mode"
+  "Open v2ex mode."
   (interactive "P")
   (message "open v2ex.com using %s way." (if async
                                              "async"
@@ -143,12 +144,11 @@
            :error (cl-function
                    (lambda (&rest args &key error-thrown &allow-other-keys)
                      (error "Got errror: %S in request %s!Please retry!" error-thrown (plist-get v2ex-current-visit :url))))
-           :timeout v2ex-request-timeout
-           ))
+           :timeout v2ex-request-timeout))
 
 ;;;###autoload
 (defun v2ex-latest (&optional async)
-  "open v2ex latest topics"
+  "Open v2ex latest topics."
   (interactive "P")
   (setq v2ex-current-visit
         '(:name "latest" :url v2ex-latest-api-uri :desc "最新主题"))
@@ -156,7 +156,7 @@
 
 ;;;###autoload
 (defun v2ex-hot (&optional async)
-  "open v2ex hot topics"
+  "Open v2ex hot topics."
   (interactive "P")
   (setq v2ex-current-visit
         '(:name "hot" :url v2ex-hot-api-uri :desc "最热主题"))
@@ -169,21 +169,20 @@
 (defvar v2ex-entry-format "%N. %[%T%] (%U@%S|发表:%P|%R个回复|最近:%Q)\n")
 
 (defun v2ex-make-entry (data n)
-  (let ()
-    (v2ex--alet (title url replies member node created last_touched)
-                data
-                (list 'v2ex-entry
-                      :format v2ex-entry-format
-                      :value url
-                      :help-echo url
-                      :tab-order n
-                      :v2ex-n n
-                      :v2ex-title title
-                      :v2ex-member member
-                      :v2ex-node node
-                      :v2ex-created created
-                      :v2ex-last-touched last_touched
-                      :v2ex-replies replies))))
+  (v2ex--alet (title url replies member node created last_touched)
+              data
+              (list 'v2ex-entry
+                    :format v2ex-entry-format
+                    :value url
+                    :help-echo url
+                    :tab-order n
+                    :v2ex-n n
+                    :v2ex-title title
+                    :v2ex-member member
+                    :v2ex-node node
+                    :v2ex-created created
+                    :v2ex-last-touched last_touched
+                    :v2ex-replies replies)))
 
 (defun v2ex-entry-format (widget char)
   (cl-case char
