@@ -59,8 +59,6 @@
     map)
   "Major mode for visit http://v2ex.com/")
 
-(defvar v2ex-entry-format "%N. %[%T%] (%U@%S ,%R个回复)\n")
-
 (define-derived-mode v2ex-mode special-mode "v2ex-mode"
   "Major mode for visit http://v2ex.com/"
   (widen)
@@ -163,9 +161,11 @@
   "A widget representing a v2ex entry."
   :format-handler 'v2ex-entry-format)
 
+(defvar v2ex-entry-format "%N. %[%T%] (%U@%S|发表:%P|%R个回复|最近:%Q)\n")
+
 (defun v2ex-make-entry (data n)
   (let ()
-    (v2ex--alet (title url replies member node)
+    (v2ex--alet (title url replies member node created last_touched)
                 data
                 (list 'v2ex-entry
                       :format v2ex-entry-format
@@ -176,6 +176,8 @@
                       :v2ex-title title
                       :v2ex-member member
                       :v2ex-node node
+                      :v2ex-created created
+                      :v2ex-last-touched last_touched
                       :v2ex-replies replies))))
 
 (defun v2ex-entry-format (widget char)
@@ -184,6 +186,12 @@
     (?T (insert (truncate-string-to-width (widget-get widget :v2ex-title) 80 nil nil t)))
     (?U (insert (format "%s" (assoc-default 'username (widget-get widget :v2ex-member)))))
     (?S (insert (format "%s" (assoc-default 'title (widget-get widget :v2ex-node)))))
+    (?P (insert (format "%s" (format-time-string
+                              "%Y-%m-%d %H:%M:%S"
+                              (seconds-to-time (widget-get widget :v2ex-created))))))
+    (?Q (insert (format "%s" (format-time-string
+                              "%Y-%m-%d %H:%M:%S"
+                              (seconds-to-time (widget-get widget :v2ex-last-touched))))))
     (?R (insert (format "%d" (widget-get widget :v2ex-replies))))
     (t (widget-default-format-handler widget char))))
 
