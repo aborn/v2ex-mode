@@ -97,7 +97,7 @@
     (re-search-forward "^$")
     (json-read-from-string (buffer-substring (point) (point-max)))))
 
-(defun v2ex--render (json-content)
+(defun v2ex--render (json-content response)
   ;; (message "json-content=%s" json-content)
   (let* ((v2ex-buffer (get-buffer-create v2ex-buffer-name))
          (site-desc (plist-get v2ex-current-visit :desc))
@@ -107,8 +107,10 @@
       (erase-buffer)
       (setq font-lock-mode nil)
       (goto-char (point-min))
-      (insert (format "  %s ----- time:%s\n" site-desc
-                      (format-time-string "%Y-%m-%d %H:%M:%S Week %W" (current-time))))
+      (insert (format "  %s ----- time:%s remaining:%s(limit:%s)\n" site-desc
+                      (format-time-string "%Y-%m-%d %H:%M:%S Week %W" (current-time))
+                      (request-response-header response "X-Rate-Limit-Remaining")
+                      (request-response-header response "X-Rate-Limit-Limit")))
       (dolist (item (mapcar #'identity json-content))
         (widget-create (v2ex-make-entry item num))
         (setq num (1+ num)))
@@ -132,9 +134,9 @@
                      (json-read-from-string (decode-coding-string (buffer-string) 'utf-8)))
            :sync (not async)
            :success (cl-function
-                     (lambda (&key data &allow-other-keys)
+                     (lambda (&key data &key response &allow-other-keys)
                        (message "Request http://v2ex.com/ success!")
-                       (v2ex--render data)))
+                       (v2ex--render data response)))
            :complete (lambda (&rest _) (message "Request finished and *v2ex* updated!"))
            :error (cl-function
                    (lambda (&rest args &key error-thrown &allow-other-keys)
