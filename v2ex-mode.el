@@ -47,11 +47,10 @@
 
 (defvar v2ex-mode-map
   (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map widget-keymap)
+    (set-keymap-parent map special-mode-map)
     (define-key map "r" 'v2ex)
     (define-key map "H" 'v2ex-hot)
     (define-key map "L" 'v2ex-latest)
-    (define-key map "q" 'v2ex-quit)
     ;; vim-like hjkl for cursor move swiftly
     (define-key map "h" 'backward-char)
     (define-key map "j" 'next-line)  
@@ -99,7 +98,7 @@
     (re-search-forward "^$")
     (json-read-from-string (buffer-substring (point) (point-max)))))
 
-(defun v2ex--action (json-content)
+(defun v2ex--render (json-content)
   ;; (message "json-content=%s" json-content)
   (let* ((v2ex-buffer (get-buffer-create v2ex-buffer-name))
          (site-desc (plist-get v2ex-current-visit :desc))
@@ -120,16 +119,7 @@
   (unless (get-buffer-window v2ex-buffer-name)
     (if (one-window-p)
         (switch-to-buffer v2ex-buffer-name)
-      (switch-to-buffer-other-window v2ex-buffer-name)))
-  (message "v2ex updated!"))
-
-(defun v2ex-quit ()
-  "quit the v2ex buffer"
-  (interactive)
-  (let ((buffer (current-buffer)))
-    (unless (one-window-p)
-      (delete-window))
-    (kill-buffer buffer)))
+      (switch-to-buffer-other-window v2ex-buffer-name))))
 
 ;;;###autoload
 (defun v2ex (&optional async)
@@ -145,8 +135,8 @@
            :success (cl-function
                      (lambda (&key data &allow-other-keys)
                        (message "Request http://v2ex.com/ success!")
-                       (v2ex--action data)))
-           :complete (lambda (&rest _) (message "Request finished!"))
+                       (v2ex--render data)))
+           :complete (lambda (&rest _) (message "Request finished and *v2ex* updated!"))
            :error (cl-function
                    (lambda (&rest args &key error-thrown &allow-other-keys)
                      (error "Got errror: %S in request %s!Please retry!" error-thrown (plist-get v2ex-current-visit :url))))
