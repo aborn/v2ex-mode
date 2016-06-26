@@ -102,7 +102,6 @@
 (defun v2ex--action (json-content)
   ;; (message "json-content=%s" json-content)
   (let* ((v2ex-buffer (get-buffer-create v2ex-buffer-name))
-         (site-name (plist-get v2ex-current-visit :name))
          (site-desc (plist-get v2ex-current-visit :desc))
          (num 0))
     (with-current-buffer v2ex-buffer
@@ -113,9 +112,7 @@
       (insert (format "  %s ----- time:%s\n" site-desc
                       (format-time-string "%Y-%m-%d %H:%M:%S" (current-time))))
       (dolist (item (mapcar #'identity json-content))
-        (let ((url (assoc-default 'url item))
-              (replies (assoc-default 'replies item)))
-          (widget-create (v2ex-make-entry item num)))
+        (widget-create (v2ex-make-entry item num))
         (setq num (1+ num)))
       (widget-setup)
       (goto-char (point-min))
@@ -147,10 +144,12 @@
            :sync (not async)
            :success (cl-function
                      (lambda (&key data &allow-other-keys)
+                       (message "Request http://v2ex.com/ success!")
                        (v2ex--action data)))
+           :complete (lambda (&rest _) (message "Request finished!"))
            :error (cl-function
-                   (lambda (&key data &allow-other-keys)
-                     (error "请求%s服务失败，请重试！" (plist-get v2ex-current-visit :url))))
+                   (lambda (&rest args &key error-thrown &allow-other-keys)
+                     (error "Got errror: %S in request %s!Please retry!" error-thrown (plist-get v2ex-current-visit :url))))
            :timeout v2ex-request-timeout
            ))
 
