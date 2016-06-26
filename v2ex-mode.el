@@ -92,13 +92,6 @@
   :group 'v2ex-mode
   :type 'number)
 
-(defun v2ex--read-http-data-as-json (http-data)
-  (with-temp-buffer
-    (insert http-data)
-    (goto-char (point-min))
-    (re-search-forward "^$")
-    (json-read-from-string (buffer-substring (point) (point-max)))))
-
 (defun v2ex--render (json-content response)
   ;; (message "json-content=%s" json-content)
   (let* ((v2ex-buffer (get-buffer-create v2ex-buffer-name))
