@@ -1,4 +1,4 @@
-;;; v2ex-mode.el --- visiting v2ex.com site.  -*- lexical-binding: t; -*-
+;;; v2ex-mode.el --- Major mode for visit http://v2ex.com/ site.  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2016 Aborn Jiang
 
@@ -29,7 +29,7 @@
 
 ;;; Commentary:
 
-;; visiting ve2x.com freely.
+;; Visiting ve2x.com freely.
 ;; M-x v2ex
 ;; M-x v2ex-hot
 ;; M-x v2ex-latest
