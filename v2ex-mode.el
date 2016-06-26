@@ -3,7 +3,7 @@
 ;; Copyright (C) 2016 Aborn Jiang
 
 ;; Author: Aborn Jiang <aborn.jiang@gmail.com>
-;; Version: 1.0
+;; Version: 0.1
 ;; Package-Requires: ((cl-lib "0.5") (request "0.2"))
 ;; Keywords: v2ex, v2ex.com
 ;; Homepage: https://github.com/aborn/v2ex-mode
