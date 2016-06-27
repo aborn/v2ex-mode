@@ -36,3 +36,4 @@ swiftly.
 ## Show
 The content list are shown in \*v2ex* buffer.  
 ![](doc/v2ex.png "v2ex conent list")
+![](doc/v2ex2.png "v2ex v0.2 conent list")
