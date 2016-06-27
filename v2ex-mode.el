@@ -51,7 +51,7 @@
 
 (defvar v2ex-mode-map
   (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map (make-composed-keymap widget-keymap special-mode-map))
+    (set-keymap-parent map tabulated-list-mode-map)
     (define-key map "q" 'quit-window)
     (define-key map "r" 'v2ex)
     (define-key map "H" 'v2ex-hot)
@@ -104,6 +104,10 @@
         (switch-to-buffer v2ex-buffer-name)
       (switch-to-buffer-other-window v2ex-buffer-name))))
 
+(define-button-type 'v2ex-button
+  'action (lambda (b) (browse-url (button-get b 'link)))
+  'follow-link t)
+
 ;; TODO: Need to indicate (plist-get v2ex-current-visit :desc) somewhere
 (define-derived-mode v2ex-mode tabulated-list-mode "V2EX"
   "Major mode for browsing http://v2ex.com/.
@@ -126,8 +130,8 @@ Letters do not insert themselves; instead, they are commands.
                                       "%a %H:%M"
                                       .created)
                                      (number-to-string .replies)
-                                     ;; FIXME: clicking is not working yet
-                                     (cons .title (list :url .url)))))))
+                                     (cons .title (list :type 'v2ex-button
+                                                        'link .url)))))))
   (tabulated-list-print))
 
 ;;;###autoload
