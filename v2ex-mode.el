@@ -125,7 +125,7 @@ Letters do not insert themselves; instead, they are commands.
                                      .node.title
                                      (format-time-string
                                       "%a %H:%M"
-                                      .created)
+                                      (seconds-to-time .created))
                                      (number-to-string .replies)
                                      (cons .title (list :type 'v2ex-button
                                                         'link .url)))))))
