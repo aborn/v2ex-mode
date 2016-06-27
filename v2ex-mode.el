@@ -163,6 +163,13 @@
 
 (defvar v2ex-entry-format "%N. %[%T%] (%U@%S|发表:%P|%R个回复|最近:%Q)\n")
 
+(defmacro v2ex--alet (vars alist &rest forms)
+  (let ((alist-var (make-symbol "alist")))
+    `(let* ((,alist-var ,alist)
+            ,@(cl-loop for var in vars
+                       collecting `(,var (assoc-default ',var ,alist-var))))
+       ,@forms)))
+
 (defun v2ex-make-entry (data n)
   (v2ex--alet (title url replies member node created last_touched)
               data
@@ -193,13 +200,6 @@
                               (seconds-to-time (widget-get widget :v2ex-last-touched))))))
     (?R (insert (format "%d" (widget-get widget :v2ex-replies))))
     (t (widget-default-format-handler widget char))))
-
-(defmacro v2ex--alet (vars alist &rest forms)
-  (let ((alist-var (make-symbol "alist")))
-    `(let* ((,alist-var ,alist)
-            ,@(cl-loop for var in vars
-                       collecting `(,var (assoc-default ',var ,alist-var))))
-       ,@forms)))
 
 (provide 'v2ex-mode)
 ;;; v2ex-mode.el ends here
