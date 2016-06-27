@@ -67,11 +67,6 @@
     map)
   "Major mode for visit http://v2ex.com/.")
 
-(defcustom v2ex-buffer-name "*v2ex*"
-  "The buffer name of content display."
-  :group 'v2ex-mode
-  :type 'string)
-
 (defcustom v2ex-hot-api-uri "https://www.v2ex.com/api/topics/hot.json"
   "The hot topic api."
   :group 'v2ex-mode
@@ -92,23 +87,25 @@
   :type 'number)
 
 (defvar v2ex--json nil "JSON object in Emacs Lisp.")
+(defvar v2ex--buffer-name (format "*v2ex:%s*" (plist-get v2ex-current-visit :desc)))
 
-(defun v2ex--render (json-content response)
+(defun v2ex--render (json-content _response)
   (setq v2ex--json json-content)
-  (with-current-buffer (get-buffer-create v2ex-buffer-name)
+  (with-current-buffer (get-buffer-create v2ex--buffer-name)
     (let ((inhibit-read-only t))
       (erase-buffer)
-      (v2ex-mode)))
-  (unless (get-buffer-window v2ex-buffer-name)
-    (if (one-window-p)
-        (switch-to-buffer v2ex-buffer-name)
-      (switch-to-buffer-other-window v2ex-buffer-name))))
+      (v2ex-mode))
+    (setq v2ex--buffer-name (format "*v2ex:%s*" (plist-get v2ex-current-visit :desc)))
+    (rename-buffer v2ex--buffer-name)
+    (unless (get-buffer-window)
+      (if (one-window-p)
+          (switch-to-buffer (current-buffer))
+        (switch-to-buffer-other-window (current-buffer))))))
 
 (define-button-type 'v2ex-button
   'action (lambda (b) (browse-url (button-get b 'link)))
   'follow-link t)
 
-;; TODO: Need to indicate (plist-get v2ex-current-visit :desc) somewhere
 (define-derived-mode v2ex-mode tabulated-list-mode "V2EX"
   "Major mode for browsing http://v2ex.com/.
 Letters do not insert themselves; instead, they are commands.
