@@ -106,6 +106,23 @@
   'action (lambda (b) (browse-url (button-get b 'link)))
   'follow-link t)
 
+(defvar v2ex--node-info-cache (make-hash-table :test #'equal))
+(defun v2ex--request-node-info (node)
+  (if (member node (hash-table-keys v2ex--node-info-cache))
+      (gethash node v2ex--node-info-cache)
+    (let* ((node-url "https://www.v2ex.com/api/nodes/show.json")
+          (node-info (request-response-data (request node-url
+                                                     :params `(("name" . ,node))
+                                                     :parser (lambda ()
+                                                               (json-read-from-string (decode-coding-string (buffer-string) 'utf-8)))
+                                                     :sync t
+                                                     ))))
+      (puthash node node-info v2ex--node-info-cache)
+      node-info)))
+
+
+;; (let-alist (v2ex--request-node-info "python") .url)
+
 (define-derived-mode v2ex-mode tabulated-list-mode "V2EX"
   "Major mode for browsing http://v2ex.com/.
 Letters do not insert themselves; instead, they are commands.
@@ -122,7 +139,11 @@ Letters do not insert themselves; instead, they are commands.
                  collect
                  (let-alist elt
                    (list .id (vector .member.username
-                                     .node.title
+                                     (cons .node.title (list :type 'v2ex-button
+                                                             'link (let-alist (v2ex--request-node-info .node.name)
+                                                                     .url)
+                                                             'help-echo (let-alist (v2ex--request-node-info .node.name)
+                                                                          .header)))
                                      (format-time-string
                                       "%a %H:%M"
                                       (seconds-to-time .created))
