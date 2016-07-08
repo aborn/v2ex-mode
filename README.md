@@ -1,6 +1,7 @@
 # v2ex-mode
 [![Build Status](https://travis-ci.org/aborn/v2ex-mode.svg?branch=master)](https://travis-ci.org/aborn/v2ex-mode)
 [![MELPA](https://melpa.org/packages/v2ex-mode-badge.svg)](https://melpa.org/#/v2ex-mode)
+[![POPKIT ELPA](https://elpa.popkit.org/packages/v2ex-mode-badge.svg)](https://elpa.popkit.org/#/v2ex-mode)
 [![MELPA Stable](http://stable.melpa.org/packages/v2ex-mode-badge.svg)](http://stable.melpa.org/#/v2ex-mode)  
 v2ex-mode, visiting [http://v2ex.com/](http://v2ex.com/) freely in emacs.
 
