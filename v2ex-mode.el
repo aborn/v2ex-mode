@@ -129,6 +129,14 @@
 
 ;; (let-alist (v2ex--request-node-info "python") .url)
 
+(defun v2ex-mode-format-human-readable-time (from to)
+  "获得一个从 FROM 到 TO 的直观的时间差.  FROM 和 TO 均是以秒计的时间量."
+  (let* ((delta-t (- to from))
+         (days (string-to-number (format-seconds "%d" delta-t))))
+    (if (= 0 days)
+        (format-seconds "%2h 小时 %z%2m 分钟前" delta-t)
+      (format-seconds "%2d 天前" delta-t))))
+
 (define-derived-mode v2ex-mode tabulated-list-mode "V2EX"
   "Major mode for browsing http://v2ex.com/.
 Letters do not insert themselves; instead, they are commands.
@@ -136,7 +144,7 @@ Letters do not insert themselves; instead, they are commands.
 \\{v2ex-mode-map}"
   (setq tabulated-list-format [("Member"  12 nil)
                                ("Node"    11 nil)
-                               ("Created" 10 nil)
+                               ("Created" 18 nil)
                                ("Replies" 8  nil)
                                ("Title"   0  nil)])
   (tabulated-list-init-header)
@@ -150,9 +158,7 @@ Letters do not insert themselves; instead, they are commands.
                                                                      .url)
                                                              'help-echo (let-alist (v2ex--request-node-info .node.name)
                                                                           .header)))
-                                     (format-time-string
-                                      "%a %H:%M"
-                                      (seconds-to-time .created))
+                                     (v2ex-mode-format-human-readable-time .created (float-time))
                                      (number-to-string .replies)
                                      (cons .title (list :type 'v2ex-button
                                                         'link .url)))))))
