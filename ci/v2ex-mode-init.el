@@ -3,5 +3,4 @@
 (require 'url-http)
 (require 'wid-edit)
 (require 'request)
-(require 'subr-x)
 (mapc #'byte-compile-file '("v2ex-mode.el"))
