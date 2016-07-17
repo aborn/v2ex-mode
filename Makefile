@@ -2,7 +2,7 @@ EMACS ?= emacs
 CASK ?= cask
 
 ELPA_DIR = \
-	.cask/$(shell $(EMACS) -Q --batch --eval '(princ emacs-version)')/elpa
+	.cask/$(shell $(EMACS) -Q --batch --eval '(princ (format "%d.%d" emacs-major-version emacs-minor-version))')/elpa
 
 .PHONY: travis-ci clean
 
